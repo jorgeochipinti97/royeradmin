@@ -9,11 +9,30 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@emotion/react": "^11.10.4",
+    "@emotion/styled": "^11.10.4",
+    "@mui/icons-material": "^5.10.6",
+    "@mui/material": "^5.10.7",
+    "@mui/x-data-grid": "^5.17.5",
+    "@types/nodemailer": "^6.4.6",
+    "axios": "^0.27.2",
+    "cloudinary": "^1.32.0",
+    "coingecko-api": "^1.0.10",
+    "formidable": "^2.0.1",
+    "js-cookie": "^3.0.1",
+    "mongoose": "^6.6.3",
     "next": "12.3.1",
+    "nodemailer": "^6.8.0",
     "react": "18.2.0",
-    "react-dom": "18.2.0"
+    "react-dom": "18.2.0",
+    "react-hook-form": "^7.36.1",
+    "react-infinite-scroll-component": "^6.1.0",
+    "swr": "^1.3.0"
   },
   "devDependencies": {
+    "@types/coingecko-api": "^1.0.10",
+    "@types/formidable": "^2.0.5",
+    "@types/js-cookie": "^3.0.2",
     "@types/node": "18.8.0",
     "@types/react": "18.0.21",
     "@types/react-dom": "18.0.6",
