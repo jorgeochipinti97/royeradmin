@@ -8,6 +8,7 @@ import {
   TextField,
   capitalize,
   Card,
+  Divider,
 } from "@mui/material";
 import { DataGrid, GridColDef, GridValueGetterParams } from "@mui/x-data-grid";
 import useSWR from "swr";
@@ -123,6 +124,7 @@ const columns: GridColDef[] = [
 const OrdersPage = () => {
   const { data, error } = useSWR<IOrder[]>("/api/admin/orders");
   const [ordersFilter, setOrdersFilter] = useState(error ? [] : data);
+  const [instagram__, setInstagram__] = useState("");
   if (!data && !error) return <></>;
   const rows = data!.map((order) => ({
     id: order._id,
@@ -166,16 +168,30 @@ const OrdersPage = () => {
       ? data.filter((e) => e._id && e._id.includes(key))
       : [];
     const ordersByEmail: IOrder[] = data
-      ? data.filter((e) => e.shippingAddress.email && e.shippingAddress.email.includes(key))
+      ? data.filter(
+          (e) =>
+            e.shippingAddress.email && e.shippingAddress.email.includes(key)
+        )
       : [];
 
     filter == "nombre" && setOrdersFilter(ordersByName);
     filter == "apellido" && setOrdersFilter(ordersByLastName);
     filter == "id" && setOrdersFilter(ordersById);
     filter == "email" && setOrdersFilter(ordersByEmail);
-
   };
 
+  const setInstagram = async (insta: string, order_: IOrder) => {
+    const orden__ = {
+      ...order_,
+      instagra: insta,
+    };
+    console.log(orden__);
+    // await tesloApi({
+    //   url: "/orders",
+    //   method: "PUT",
+    //   data: orden__,
+    // });
+  };
   return (
     <AdminLayout
       title={"Ordenes"}
@@ -192,28 +208,31 @@ const OrdersPage = () => {
           />
         </Grid>
       </Grid>
-      <Box sx={{ mt: 3 }} display='flex' justifyContent='center'>
+      <Typography variant="h5" sx={{ textAlign: "center" }}>
+        Filtrar Ordenes por:
+      </Typography>
+      <Box sx={{ mt: 3 }} display="flex" justifyContent="center">
         <Box display="flex" flexDirection="column">
-          <Box sx={{ mt: 3 }}>
-            <Box sx={{ mt: 3 }}>
+          <Box sx={{ mt: 1 }}>
+            <Box sx={{ mt: 1 }}>
               <TextField
                 label="ID"
                 onChange={(e) => searchOrders("id", e.target.value)}
               />
             </Box>
-            <Box sx={{ mt: 3 }}>
+            <Box sx={{ mt: 1 }}>
               <TextField
                 label="Nombre"
                 onChange={(e) => searchOrders("nombre", e.target.value)}
               />
             </Box>
-            <Box sx={{ mt: 3 }}>
+            <Box sx={{ mt: 1 }}>
               <TextField
                 label="Apellido"
                 onChange={(e) => searchOrders("apellido", e.target.value)}
               />
             </Box>
-            <Box sx={{ mt: 3 }}>
+            <Box sx={{ mt: 1 }}>
               <TextField
                 label="Email"
                 onChange={(e) => searchOrders("email", e.target.value)}
@@ -222,7 +241,7 @@ const OrdersPage = () => {
           </Box>
         </Box>
       </Box>
-
+      <Divider sx={{ my: 1 }} />
       <Grid container>
         {ordersFilter &&
           ordersFilter.map((e) => (
@@ -231,12 +250,25 @@ const OrdersPage = () => {
                 <Card sx={{ p: 3 }}>
                   <Box sx={{ textAlign: "center" }}>
                     <Typography variant="subtitle1">{e._id}</Typography>
+                    <Typography variant="subtitle1">{e.instagram}</Typography>
                     <Typography variant="subtitle1">
                       {capitalize(e.shippingAddress.firstName)}{" "}
                       {capitalize(e.shippingAddress.lastName)}
                     </Typography>
                     <Typography variant="subtitle1">
+                      {e.shippingAddress.address}
+                    </Typography>
+                    <Typography variant="subtitle1">
                       {e.shippingAddress.country}
+                    </Typography>
+                    <Typography variant="subtitle1">
+                      {e.shippingAddress.zip}
+                    </Typography>
+                    <Typography variant="subtitle1">
+                      {e.shippingAddress.email}
+                    </Typography>
+                    <Typography variant="subtitle1">
+                      {e.shippingAddress.phone}
                     </Typography>
                     <Typography variant="subtitle1">
                       {new Date(e.createdAt!).toLocaleDateString("es-ES", {
@@ -245,6 +277,17 @@ const OrdersPage = () => {
                         day: "numeric",
                       })}
                     </Typography>
+
+                    {e.orderItems &&
+                      e.orderItems.map((e) => (
+                        <Box display="flex" flexDirection='column'>
+                          <Typography variant="subtitle1">{e.title}</Typography>
+                          <Typography variant="subtitle1">
+                            Talle: {e.size}
+                          </Typography>
+                        </Box>
+                      ))}
+
                     <Typography
                       variant="subtitle1"
                       sx={{ color: e.isPaid ? "green" : "red" }}
@@ -263,6 +306,24 @@ const OrdersPage = () => {
                     >
                       {e.isPaid && `${e.transactionId}`}
                     </Typography>
+                  </Box>
+                  <Divider sx={{ my: 1 }} />
+                  <Box display="flex" flexDirection="column" sx={{ mt: 4 }}>
+                    <Box display="flex" justifyContent="center">
+                      <TextField
+                        label="instagram"
+                        onChange={(e) => setInstagram__(e.target.value)}
+                      />
+                    </Box>
+                    <Box display="flex" justifyContent="center" sx={{ mt: 1 }}>
+                      <Button
+                        variant="contained"
+                        color="secondary"
+                        onClick={() => setInstagram(instagram__, e)}
+                      >
+                        Enviar
+                      </Button>
+                    </Box>
                   </Box>
                 </Card>
               </Box>

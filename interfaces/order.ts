@@ -7,12 +7,12 @@ export interface IOrder {
     orderItems: IOrderItem[];
     shippingAddress: ShippingAddress;
     paymentResult?: string;
-
+    status?:string
     numberOfItems: number;
     subTotal: number;
     tax: number;
     total: number;
-
+    instagram: string
     isPaid: boolean;
     paidAt?: string;
 
