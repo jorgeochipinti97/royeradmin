@@ -81,7 +81,7 @@ const OrderPage: NextPage<Props> = ({ order }) => {
 
                                 {
                                     order.orderItems.map(e => (
-                                        <Grid item xs={12}>
+                                        <Grid item xs={12} key={e.title}>
 
                                             <Card>
                                                 <Box display='flex' justifyContent='center'>

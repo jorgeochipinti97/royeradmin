@@ -4,11 +4,14 @@ import { useRouter } from 'next/router';
 
 import { AppBar, Badge, Box, Button, IconButton, Input, InputAdornment, Link, Toolbar, Typography } from '@mui/material';
 import { ClearOutlined, SearchOutlined, ShoppingCartOutlined } from '@mui/icons-material';
+import { LoginLogout } from '../LoginLogout';
+import { useUser } from '@auth0/nextjs-auth0/client';
 
 
 export const Navbar = () => {
 
     const { asPath, push } = useRouter();
+    const { isLoading, user } = useUser()
 
 
     const [searchTerm, setSearchTerm] = useState('');
@@ -30,7 +33,7 @@ export const Navbar = () => {
                         <Typography sx={{ ml: 0.5 }}>Store</Typography>
                     </Link>
                 </NextLink>
-
+       
                 <Box flex={1} />
 
                 <Box sx={{ display: isSearchVisible ? 'none' : { xs: 'none', sm: 'block' } }}
@@ -45,11 +48,6 @@ export const Navbar = () => {
                             <Button color={asPath === '/admin/orders' ? 'primary' : 'info'}>Orders</Button>
                         </Link>
                     </NextLink>
-                    <NextLink href='/admin/crypto' passHref>
-                        <Link>
-                            <Button color={asPath === '/admin/crypto' ? 'primary' : 'info'}>Crypto Orders</Button>
-                        </Link>
-                    </NextLink>
                     <NextLink href='/admin/products' passHref>
                         <Link>
                             <Button color={asPath === '/admin/products' ? 'primary' : 'info'}>Products</Button>
@@ -60,18 +58,13 @@ export const Navbar = () => {
                             <Button color={asPath === '/admin/products/new' ? 'primary' : 'info'}>Create New Product</Button>
                         </Link>
                     </NextLink>
-                    <NextLink href='/admin/discount' passHref>
-                        <Link>
-                            <Button color={asPath === '/admin/discount' ? 'primary' : 'info'}>Discount Code</Button>
-                        </Link>
-                    </NextLink>
                 </Box>
 
 
 
                 <Box flex={1} />
 
-
+                <LoginLogout />
 
 
             </Toolbar>

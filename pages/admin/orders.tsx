@@ -17,6 +17,7 @@ import { tesloApi } from "../../api";
 import { AdminLayout } from "../../components/layouts";
 import { IOrder, IUser } from "../../interfaces";
 import { useEffect, useState } from "react";
+import { useUser } from "@auth0/nextjs-auth0/client";
 
 const handleShipping = async (orderId: string) => {
   const orders = await tesloApi.get("/orders");
@@ -75,6 +76,7 @@ const columns: GridColDef[] = [
     },
   },
   { field: "total", headerName: "Monto total", width: 100, align: "center" },
+  { field: "name", headerName: "Nombre", width: 250, align: "center" },
   {
     field: "isPaid",
     headerName: "Pago",
@@ -96,32 +98,33 @@ const columns: GridColDef[] = [
     align: "center",
     width: 150,
   },
-  {
-    field: "noProducts",
-    headerName: "No.Productos",
-    align: "center",
-    width: 150,
-  },
-  {
-    field: "isShipping",
-    headerName: "Shipping",
-    align: "center",
-    width: 250,
-    renderCell: ({ row }: any) => {
-      return row.isShipping ? (
-        <Chip variant="outlined" label="enviado" color="success" />
-      ) : (
-        <Button color="success" onClick={() => handleShipping(row.id)}>
-          Poner como enviado
-        </Button>
-      );
-    },
-  },
+  // {
+  //   field: "noProducts",
+  //   headerName: "No.Productos",
+  //   align: "center",
+  //   width: 150,
+  // },
+  // {
+  //   field: "isShipping",
+  //   headerName: "Shipping",
+  //   align: "center",
+  //   width: 250,
+  //   renderCell: ({ row }: any) => {
+  //     return row.isShipping ? (
+  //       <Chip variant="outlined" label="enviado" color="success" />
+  //     ) : (
+  //       <Button color="success" onClick={() => handleShipping(row.id)}>
+  //         Poner como enviado
+  //       </Button>
+  //     );
+  //   },
+  // },
 
   { field: "createdAt", headerName: "Creada en", width: 300, align: "center" },
 ];
 
 const OrdersPage = () => {
+  const { isLoading, user } = useUser()
   const { data, error } = useSWR<IOrder[]>("/api/admin/orders");
   const [ordersFilter, setOrdersFilter] = useState(error ? [] : data);
   const [instagram__, setInstagram__] = useState("");
@@ -130,7 +133,7 @@ const OrdersPage = () => {
     id: order._id,
     total: order.total,
     isPaid: order.isPaid,
-    noProducts: order.numberOfItems,
+    name: `${order.shippingAddress.firstName} ${order.shippingAddress.lastName}`,
     transtactionId: order.transactionId,
     orderItems: order.orderItems.map((e) => e.title),
     createdAt: new Date(order.createdAt!).toLocaleDateString("es-ES", {
@@ -146,38 +149,44 @@ const OrdersPage = () => {
   const searchOrders = (filter: string, key: string) => {
     const ordersByName: IOrder[] = data
       ? data.filter(
-          (e) =>
-            e.shippingAddress.firstName
-              .toLowerCase()
-              .includes(key.toLocaleLowerCase()) ||
-            e.shippingAddress.lastName
-              .toLowerCase()
-              .includes(key.toLocaleLowerCase())
-        )
+        (e) =>
+          e.shippingAddress.firstName
+            .toLowerCase()
+            .includes(key.toLocaleLowerCase()) ||
+          e.shippingAddress.lastName
+            .toLowerCase()
+            .includes(key.toLocaleLowerCase())
+      )
       : [];
 
     const ordersByLastName: IOrder[] = data
       ? data.filter((e) =>
-          e.shippingAddress.lastName
-            .toLowerCase()
-            .includes(key.toLocaleLowerCase())
-        )
+        e.shippingAddress.lastName
+          .toLowerCase()
+          .includes(key.toLocaleLowerCase())
+      )
       : [];
 
     const ordersById: IOrder[] = data
       ? data.filter((e) => e._id && e._id.includes(key))
       : [];
+
     const ordersByEmail: IOrder[] = data
       ? data.filter(
-          (e) =>
-            e.shippingAddress.email && e.shippingAddress.email.includes(key)
-        )
+        (e) =>
+          e.shippingAddress.email && e.shippingAddress.email.includes(key)
+      )
+      : [];
+
+    const ordersBytransactionId: IOrder[] = data
+      ? data.filter((e) => e.transactionId && e.transactionId.includes(key))
       : [];
 
     filter == "nombre" && setOrdersFilter(ordersByName);
     filter == "apellido" && setOrdersFilter(ordersByLastName);
     filter == "id" && setOrdersFilter(ordersById);
     filter == "email" && setOrdersFilter(ordersByEmail);
+    filter == "transactionId" && setOrdersFilter(ordersBytransactionId);
   };
 
   const setInstagram = async (insta: string, order_: IOrder) => {
@@ -198,138 +207,151 @@ const OrdersPage = () => {
       subTitle={"Mantenimiento de ordenes"}
       icon={<ConfirmationNumberOutlined />}
     >
-      <Grid container className="fadeIn">
-        <Grid item xs={12} sx={{ height: 650, width: "100%" }}>
-          <DataGrid
-            rows={rows}
-            columns={columns}
-            pageSize={10}
-            rowsPerPageOptions={[10]}
-          />
-        </Grid>
-      </Grid>
-      <Typography variant="h5" sx={{ textAlign: "center" }}>
-        Filtrar Ordenes por:
-      </Typography>
-      <Box sx={{ mt: 3 }} display="flex" justifyContent="center">
-        <Box display="flex" flexDirection="column">
-          <Box sx={{ mt: 1 }}>
-            <Box sx={{ mt: 1 }}>
-              <TextField
-                label="ID"
-                onChange={(e) => searchOrders("id", e.target.value)}
+      {user?.email?.toLowerCase() == 'jorgeochipinti97@gmail.com' ? (
+        <>
+          <Grid container className="fadeIn">
+            <Grid item xs={12} sx={{ height: 650, width: "100%" }}>
+              <DataGrid
+                rows={rows}
+                columns={columns}
+                pageSize={10}
+                rowsPerPageOptions={[10]}
               />
-            </Box>
-            <Box sx={{ mt: 1 }}>
-              <TextField
-                label="Nombre"
-                onChange={(e) => searchOrders("nombre", e.target.value)}
-              />
-            </Box>
-            <Box sx={{ mt: 1 }}>
-              <TextField
-                label="Apellido"
-                onChange={(e) => searchOrders("apellido", e.target.value)}
-              />
-            </Box>
-            <Box sx={{ mt: 1 }}>
-              <TextField
-                label="Email"
-                onChange={(e) => searchOrders("email", e.target.value)}
-              />
+            </Grid>
+          </Grid>
+          <Typography variant="h5" sx={{ textAlign: "center" }}>
+            Filtrar Ordenes por:
+          </Typography>
+          <Box sx={{ mt: 3 }} display="flex" justifyContent="center">
+            <Box display="flex" flexDirection="column">
+              <Box sx={{ mt: 1 }}>
+                <Box sx={{ mt: 1 }}>
+                  <TextField
+                    label="ID"
+                    onChange={(e) => searchOrders("id", e.target.value)}
+                  />
+                </Box>
+                <Box sx={{ mt: 1 }}>
+                  <TextField
+                    label="Nombre"
+                    onChange={(e) => searchOrders("nombre", e.target.value)}
+                  />
+                </Box>
+                <Box sx={{ mt: 1 }}>
+                  <TextField
+                    label="Apellido"
+                    onChange={(e) => searchOrders("apellido", e.target.value)}
+                  />
+                </Box>
+                <Box sx={{ mt: 1 }}>
+                  <TextField
+                    label="Email"
+                    onChange={(e) => searchOrders("email", e.target.value)}
+                  />
+                </Box>
+                <Box sx={{ mt: 1 }}>
+                  <TextField
+                    label="transactionId"
+                    onChange={(e) => searchOrders("transactionId", e.target.value)}
+                  />
+                </Box>
+              </Box>
             </Box>
           </Box>
-        </Box>
-      </Box>
-      <Divider sx={{ my: 1 }} />
-      <Grid container>
-        {ordersFilter &&
-          ordersFilter.map((e) => (
-            <Grid item xs={4} sx={{ width: "100%", mt: 2 }} key={e._id}>
-              <Box display="flex" justifyContent="center">
-                <Card sx={{ p: 3 }}>
-                  <Box sx={{ textAlign: "center" }}>
-                    <Typography variant="subtitle1">{e._id}</Typography>
-                    <Typography variant="subtitle1">{e.instagram}</Typography>
-                    <Typography variant="subtitle1">
-                      {capitalize(e.shippingAddress.firstName)}{" "}
-                      {capitalize(e.shippingAddress.lastName)}
-                    </Typography>
-                    <Typography variant="subtitle1">
-                      {e.shippingAddress.address}
-                    </Typography>
-                    <Typography variant="subtitle1">
-                      {e.shippingAddress.country}
-                    </Typography>
-                    <Typography variant="subtitle1">
-                      {e.shippingAddress.zip}
-                    </Typography>
-                    <Typography variant="subtitle1">
-                      {e.shippingAddress.email}
-                    </Typography>
-                    <Typography variant="subtitle1">
-                      {e.shippingAddress.phone}
-                    </Typography>
-                    <Typography variant="subtitle1">
-                      {new Date(e.createdAt!).toLocaleDateString("es-ES", {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      })}
-                    </Typography>
+          <Divider sx={{ my: 1 }} />
+          <Grid container>
+            {ordersFilter &&
+              ordersFilter.map((e) => (
+                <Grid item xs={4} sx={{ width: "100%", mt: 2 }} key={e._id}>
+                  <Box display="flex" justifyContent="center">
+                    <Card sx={{ p: 3 }}>
+                      <Box sx={{ textAlign: "center" }}>
+                        <Typography variant="subtitle1">{e._id}</Typography>
+                        <Typography variant="subtitle1">{e.instagram}</Typography>
+                        <Typography variant="subtitle1">
+                          {capitalize(e.shippingAddress.firstName)}{" "}
+                          {capitalize(e.shippingAddress.lastName)}
+                        </Typography>
+                        <Typography variant="subtitle1">
+                          {e.shippingAddress.address}
+                        </Typography>
+                        <Typography variant="subtitle1">
+                          {e.shippingAddress.country}
+                        </Typography>
+                        <Typography variant="subtitle1">
+                          {e.shippingAddress.zip}
+                        </Typography>
+                        <Typography variant="subtitle1">
+                          {e.shippingAddress.email}
+                        </Typography>
+                        <Typography variant="subtitle1">
+                          {e.shippingAddress.phone}
+                        </Typography>
+                        <Typography variant="subtitle1">
+                          {new Date(e.createdAt!).toLocaleDateString("es-ES", {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          })}
+                        </Typography>
 
-                    {e.orderItems &&
-                      e.orderItems.map((e) => (
-                        <Box display="flex" flexDirection='column'>
-                          <Typography variant="subtitle1">{e.title}</Typography>
-                          <Typography variant="subtitle1">
-                            Talle: {e.size}
-                          </Typography>
+                        {e.orderItems &&
+                          e.orderItems.map((e) => (
+                            <Box display="flex" flexDirection="column" key={e.size}>
+                              <Typography variant="subtitle1">{e.title}</Typography>
+                              <Typography variant="subtitle1">
+                                Talle: {e.size}
+                              </Typography>
+                            </Box>
+                          ))}
+
+                        <Typography
+                          variant="subtitle1"
+                          sx={{ color: e.isPaid ? "green" : "red" }}
+                        >
+                          {e.isPaid ? "Paga" : "No Paga"}
+                        </Typography>
+                        <Typography
+                          variant="subtitle1"
+                          sx={{ color: e.isPaid ? "green" : "red" }}
+                        >
+                          {e.isPaid && ` $${e.total} USD`}
+                        </Typography>
+                        <Typography
+                          variant="subtitle1"
+                          sx={{ color: e.isPaid ? "green" : "red" }}
+                        >
+                          {e.isPaid && `${e.transactionId}`}
+                        </Typography>
+                      </Box>
+                      <Divider sx={{ my: 1 }} />
+                      <Box display="flex" flexDirection="column" sx={{ mt: 4 }}>
+                        <Box display="flex" justifyContent="center">
+                          <TextField
+                            label="instagram"
+                            onChange={(e) => setInstagram__(e.target.value)}
+                          />
                         </Box>
-                      ))}
+                        <Box display="flex" justifyContent="center" sx={{ mt: 1 }}>
+                          <Button
+                            variant="contained"
+                            color="secondary"
+                            onClick={() => setInstagram(instagram__, e)}
+                          >
+                            Enviar
+                          </Button>
+                        </Box>
+                      </Box>
+                    </Card>
+                  </Box>
+                </Grid>
+              ))}
+          </Grid>
+        </>
+      )
+        : (<>no esas autorizado</>)
+      }
 
-                    <Typography
-                      variant="subtitle1"
-                      sx={{ color: e.isPaid ? "green" : "red" }}
-                    >
-                      {e.isPaid ? "Paga" : "No Paga"}
-                    </Typography>
-                    <Typography
-                      variant="subtitle1"
-                      sx={{ color: e.isPaid ? "green" : "red" }}
-                    >
-                      {e.isPaid && ` $${e.total} USD`}
-                    </Typography>
-                    <Typography
-                      variant="subtitle1"
-                      sx={{ color: e.isPaid ? "green" : "red" }}
-                    >
-                      {e.isPaid && `${e.transactionId}`}
-                    </Typography>
-                  </Box>
-                  <Divider sx={{ my: 1 }} />
-                  <Box display="flex" flexDirection="column" sx={{ mt: 4 }}>
-                    <Box display="flex" justifyContent="center">
-                      <TextField
-                        label="instagram"
-                        onChange={(e) => setInstagram__(e.target.value)}
-                      />
-                    </Box>
-                    <Box display="flex" justifyContent="center" sx={{ mt: 1 }}>
-                      <Button
-                        variant="contained"
-                        color="secondary"
-                        onClick={() => setInstagram(instagram__, e)}
-                      >
-                        Enviar
-                      </Button>
-                    </Box>
-                  </Box>
-                </Card>
-              </Box>
-            </Grid>
-          ))}
-      </Grid>
     </AdminLayout>
   );
 };
