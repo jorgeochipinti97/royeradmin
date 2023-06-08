@@ -23,9 +23,7 @@ const Home: NextPage = () => {
     <>
       <AdminLayout title="" subTitle={``} icon={<AirplaneTicketOutlined />}>
         <>
-          <Box>
-            <Typography variant='subtitle1'>{user && user.name}</Typography>
-          </Box>
+
         </>
       </AdminLayout>
     </>
