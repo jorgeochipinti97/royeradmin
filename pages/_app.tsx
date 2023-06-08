@@ -24,7 +24,7 @@ function MyApp({ Component, pageProps }: AppProps) {
       >
         <ThemeProvider theme={lightTheme}>
           <CssBaseline />
-          <UserProvider>
+          <UserProvider loginUrl="/foo/api/auth/login" profileUrl="/foo/api/auth/me">
             <Component {...pageProps} />
           </UserProvider>
         </ThemeProvider>
