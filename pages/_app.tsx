@@ -7,7 +7,7 @@ import { lightTheme } from '../themes';
 import { UserProvider } from '@auth0/nextjs-auth0/client';
 
 
-
+ 
 
 function MyApp({ Component, pageProps }: AppProps) {
 
