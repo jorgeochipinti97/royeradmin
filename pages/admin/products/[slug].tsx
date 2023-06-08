@@ -419,22 +419,7 @@ const ProductAdminPage: FC<Props> = ({ product }) => {
                   </FormControl>
                   <FormControl sx={{ mb: 1 }}>
                     <FormLabel>Tipo</FormLabel>
-                    <RadioGroup
-                      row
-                      value={getValues("type")}
-                      onChange={({ target }) =>
-                        setValue("type", target.value, { shouldValidate: true })
-                      }
-                    >
-                      {getValues("gender") == 'football' && validTypesFootball.map((option) => (
-                        <FormControlLabel
-                          key={option}
-                          value={option}
-                          control={<Radio color="secondary" />}
-                          label={capitalize(option)}
-                        />
-                      ))}
-                    </RadioGroup>
+
                     <RadioGroup
                       row
                       value={getValues("type")}
