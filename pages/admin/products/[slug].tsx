@@ -40,23 +40,7 @@ import { Product } from "../../../models";
 import { useUser } from "@auth0/nextjs-auth0/client";
 
 const validTypes = [
-  "shirts",
-  "t-shirt",
-  "football shirt",
-  "jacket",
-  "pants",
-  "mate",
-  "yerba",
-  "alfajores",
-  "wine",
-  "short",
-  "socks",
-  "wallet",
-  "purse",
-  "accessories",
-  "bag",
-  "espadrilles",
-  "footwear",
+  'mate', 'yerba', 'alfajores', 'wine', 'wallet', 'purse', 'accessories', 'bag', 'espadrilles', 'argentina', 'boca', 'river'
 ];
 const validGender = ["football", "regionals",];
 const validSizes = [

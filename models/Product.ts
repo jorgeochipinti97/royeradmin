@@ -4,7 +4,7 @@ import { IProduct } from '../interfaces';
 
 const productSchema = new Schema({
     description: { type: String, required: true, default: '' },
-    personalization: { type: String},
+    personalization: { type: String },
     images: [{ type: String }],
     inStock: { type: Number, required: true, default: 0 },
     price: { type: Number, required: true, default: 0 },
@@ -20,28 +20,20 @@ const productSchema = new Schema({
     title: { type: String, required: true, default: '' },
     type: {
         type: String,
-        enum: {
-            values: ['shirts', 't-shirt', 'football shirt', 'jacket', 'pants', 'hoodies', 'hats', 'mate', 'yerba', 'alfajores', 'wine', 'short', 'socks', 'wallet', 'purse', 'accessories', 'bag', 'espadrilles', 'footwear'],
-            message: '{VALUE} no es un tipo válido'
-        },
         default: 'shirts'
     },
-    talles: [{ 
+    talles: [{
         size: { type: String },
         stock: { type: Number }
     }]
     ,
     gender: {
         type: String,
-        enum: {
-            values: ['men', 'women', 'kid', 'unisex', 'regionales', 'fashion'],
-            message: '{VALUE} no es un genero válido'
-        },
         default: 'women'
     },
     popular: {
 
-        type: Boolean, 
+        type: Boolean,
         default: false,
 
     },

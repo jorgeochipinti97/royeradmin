@@ -5,13 +5,11 @@ import { useRouter } from 'next/router';
 import { AppBar, Badge, Box, Button, IconButton, Input, InputAdornment, Link, Toolbar, Typography } from '@mui/material';
 import { ClearOutlined, SearchOutlined, ShoppingCartOutlined } from '@mui/icons-material';
 import { LoginLogout } from '../LoginLogout';
-import { useUser } from '@auth0/nextjs-auth0/client';
 
 
 export const Navbar = () => {
 
     const { asPath, push } = useRouter();
-    const { isLoading, user } = useUser()
 
 
     const [searchTerm, setSearchTerm] = useState('');

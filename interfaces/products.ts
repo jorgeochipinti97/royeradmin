@@ -3,7 +3,7 @@ export interface ITallas {
     stock: number
 }
 
-export interface IProductosRelacionados{
+export interface IProductosRelacionados {
     title: string,
     price: number,
     description: string,
@@ -32,4 +32,4 @@ export interface IProduct {
 }
 
 
-export type IType = 'shirts' | 'jacket' | 'pants' | 'hoodies' | 'hats' | 'mate' | 'yerba' | 'alfajores' | 'wine' | 'short' | 'socks' | 'wallet' | 'purse' | 'accessories' | 'bag' | 'espadrilles' | 'footwear';
+export type IType = 'mate' | 'yerba' | 'alfajores' | 'wine' | 'wallet' | 'purse' | 'accessories' | 'bag' | 'espadrilles' | 'argentina' | 'boca' | 'river'
