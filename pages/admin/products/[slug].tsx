@@ -39,8 +39,11 @@ import { tesloApi } from "../../../api";
 import { Product } from "../../../models";
 import { useUser } from "@auth0/nextjs-auth0/client";
 
-const validTypes = [
-  'mate', 'yerba', 'alfajores', 'wine', 'wallet', 'purse', 'accessories', 'bag', 'espadrilles', 'argentina', 'boca', 'river'
+const validTypesRegional = [
+  'mate', 'yerba', 'alfajores', 'wine', 'wallet', 'purse', 'accessories', 'bag', 'espadrilles',
+];
+const validTypesFootball = [
+  'argentina', 'boca', 'river'
 ];
 const validGender = ["football", "regionals",];
 const validSizes = [
@@ -396,26 +399,6 @@ const ProductAdminPage: FC<Props> = ({ product }) => {
 
                 <Box display="flex" flexDirection="column">
                   <FormControl sx={{ mb: 1 }}>
-                    <FormLabel>Tipo</FormLabel>
-                    <RadioGroup
-                      row
-                      value={getValues("type")}
-                      onChange={({ target }) =>
-                        setValue("type", target.value, { shouldValidate: true })
-                      }
-                    >
-                      {validTypes.map((option) => (
-                        <FormControlLabel
-                          key={option}
-                          value={option}
-                          control={<Radio color="secondary" />}
-                          label={capitalize(option)}
-                        />
-                      ))}
-                    </RadioGroup>
-                  </FormControl>
-
-                  <FormControl sx={{ mb: 1 }}>
                     <FormLabel>Género</FormLabel>
                     <RadioGroup
                       row
@@ -434,6 +417,50 @@ const ProductAdminPage: FC<Props> = ({ product }) => {
                       ))}
                     </RadioGroup>
                   </FormControl>
+                  <FormControl sx={{ mb: 1 }}>
+                    <FormLabel>Tipo</FormLabel>
+                    <RadioGroup
+                      row
+                      value={getValues("type")}
+                      onChange={({ target }) =>
+                        setValue("type", target.value, { shouldValidate: true })
+                      }
+                    >
+                      {getValues("gender") == 'football' && validTypesFootball.map((option) => (
+                        <FormControlLabel
+                          key={option}
+                          value={option}
+                          control={<Radio color="secondary" />}
+                          label={capitalize(option)}
+                        />
+                      ))}
+                    </RadioGroup>
+                    <RadioGroup
+                      row
+                      value={getValues("type")}
+                      onChange={({ target }) =>
+                        setValue("type", target.value, { shouldValidate: true })
+                      }
+                    >
+                      {getValues("gender") == 'regionals' ? validTypesRegional.map((option) => (
+                        <FormControlLabel
+                          key={option}
+                          value={option}
+                          control={<Radio color="secondary" />}
+                          label={capitalize(option)}
+                        />
+                      )) : validTypesFootball.map((option) => (
+                        <FormControlLabel
+                          key={option}
+                          value={option}
+                          control={<Radio color="secondary" />}
+                          label={capitalize(option)}
+                        />
+                      ))}
+                    </RadioGroup>
+                  </FormControl>
+
+
 
                   <FormControl sx={{ mb: 1 }}>
                     <FormLabel>Es Popular?</FormLabel>
