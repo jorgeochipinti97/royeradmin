@@ -18,8 +18,7 @@ function MyApp({ Component, pageProps }: AppProps) {
       <SWRConfig
         value={{
           fetcher: (resource, init) => fetch(resource, init).then(res => res.json())
-        }}
-      >
+        }} >
         <ThemeProvider theme={lightTheme}>
           <CssBaseline />
           <UserProvider loginUrl="/foo/api/auth/login" profileUrl="/foo/api/auth/me">
