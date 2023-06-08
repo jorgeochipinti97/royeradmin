@@ -15,8 +15,6 @@ function MyApp({ Component, pageProps }: AppProps) {
 
   return (
     <>
-
-
       <SWRConfig
         value={{
           fetcher: (resource, init) => fetch(resource, init).then(res => res.json())
@@ -29,8 +27,6 @@ function MyApp({ Component, pageProps }: AppProps) {
           </UserProvider>
         </ThemeProvider>
       </SWRConfig>
-
-
     </>
 
 
