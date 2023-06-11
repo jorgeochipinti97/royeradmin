@@ -10,17 +10,13 @@ const productSchema = new Schema({
     price: { type: Number, required: true, default: 0 },
     sizes: [{
         type: String,
-        enum: {
-            values: ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL', 'Unique', '7.5', '8', '8.5', '9', '9.5', '10', '10.5', '11', '11.5', '12', '12.5', '13', '14', '15'],
-            message: '{VALUE} no es un tamaño válido'
-        }
     }],
     slug: { type: String, required: true, unique: true },
     tags: [{ type: String }],
     title: { type: String, required: true, default: '' },
     type: {
         type: String,
-        default: 'shirts'
+
     },
     talles: [{
         size: { type: String },
@@ -29,7 +25,7 @@ const productSchema = new Schema({
     ,
     gender: {
         type: String,
-        default: 'women'
+
     },
     popular: {
 

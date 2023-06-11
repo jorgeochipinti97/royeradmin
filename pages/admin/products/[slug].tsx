@@ -289,7 +289,7 @@ const ProductAdminPage: FC<Props> = ({ product }) => {
       subTitle={`Editando: ${product.title}`}
       icon={<DriveFileRenameOutline />}
     >
-      {user?.email?.toLowerCase() == 'jorgeochipinti97@gmail.com' ? (
+      {user?.email?.toLowerCase() == 'jorgeochipinti97@gmail.com' || 'felanese1996@gmail.com' || 'Maurobelli22@gmail.com ' ? (
         <>
           {asPath == "/admin/products/new" ? null : (
             <Box display="flex" justifyContent="end" sx={{ mb: 2 }}>
