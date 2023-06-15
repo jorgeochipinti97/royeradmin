@@ -312,7 +312,7 @@ const ProductAdminPage = () => {
       subTitle={`Editando:`}
       icon={<DriveFileRenameOutline />}
     >
-      {user?.email?.toLowerCase() == 'jorgeochipinti97@gmail.com' || 'felanese1996@gmail.com' || 'Maurobelli22@gmail.com ' || 'sabrinagerzovich@hotmail.com' || 'sabrina.gerzovich@dhl.com' ? (
+      {user?.email?.toLowerCase() == 'jorgeochipinti97@gmail.com' || 'felanese1996@gmail.com' || 'maurobelli22@gmail.com ' || 'sabrinagerzovich@hotmail.com' || 'sabrina.gerzovich@dhl.com' ? (
         <>
           {asPath == "/admin/products/new" ? null : (
             <Box display="flex" justifyContent="end" sx={{ mb: 2 }}>
