@@ -1,7 +1,7 @@
 import { ChangeEvent, FC, useEffect, useRef, useState } from "react";
 import { GetServerSideProps } from "next";
 import { useRouter } from "next/router";
-import { useForm } from "react-hook-form";
+
 
 import {
   Box,
@@ -34,10 +34,11 @@ import { AddOutlined } from "@mui/icons-material";
 
 import { AdminLayout } from "../../../components/layouts";
 import { IProduct, ITallas } from "../../../interfaces";
-import { dbProducts } from "../../../database";
+
 import { tesloApi } from "../../../api";
-import { Product } from "../../../models";
+
 import { useUser } from "@auth0/nextjs-auth0/client";
+import { useProducts } from "../../../hooks";
 
 const validTypesRegional = [
   'mate', 'yerba', 'alfajores', 'wine', 'wallet', 'purse', 'accessories', 'bag', 'espadrilles',
@@ -77,26 +78,23 @@ interface FormData {
   images: string[];
   inStock: number;
   price: number;
-  sizes: string[];
   slug: string;
   tags: string[];
   title: string;
   type: string;
-  gender: string;
+  sizes: string[];
+  personalization?: string
+  gender: string
   popular: boolean;
-  productosRelacionados?: [{
-    title: string,
-    price: number,
-    description: string,
-    image: string
-  }]
+  productosRelacionados?: []
+  createdAt?: string;
+  updatedAt?: string;
 }
 
-interface Props {
-  product: FormData;
-}
 
-const ProductAdminPage: FC<Props> = ({ product }) => {
+
+
+const ProductAdminPage = () => {
   const { asPath, push } = useRouter();
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -104,62 +102,90 @@ const ProductAdminPage: FC<Props> = ({ product }) => {
   const [isSaving, setIsSaving] = useState(false);
   const [isHidden, setIsHidden] = useState<boolean>();
   const [tallas_, setTallas_] = useState<ITallas[]>([]);
-  const { error, isLoading, user } = useUser()
+  const { error, user } = useUser()
+  const { products, isLoading } = useProducts('/products');
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    getValues,
-    setValue,
-    watch,
-  } = useForm<FormData>({
-    defaultValues: product
+  const [formData, setFormData] = useState<FormData>({
+    title: '',
+    description: '',
+    images: ["https://res.cloudinary.com/djk4q3tys/image/upload/v1686040726/shh7ufqpxuywai67lxwe.jpg", "https://res.cloudinary.com/djk4q3tys/image/upload/v1686040710/mk27c2fgicm67crrgya5.jpg"],
+    inStock: 0,
+    price: 0,
+    sizes: [],
+    slug: '',
+    tags: [],
+    type: '',
+    gender: '',
+    popular: false,
   });
 
   useEffect(() => {
     try {
-      const subscription = watch((value, { name, type }) => {
-        if (name === "title") {
-          const newSlug =
-            value.title
-              ?.trim()
-              .replaceAll(" ", "_")
-              .replaceAll("'", "")
-              .toLocaleLowerCase() || "";
 
-          setValue("slug", newSlug);
-        }
-      });
-      return () => subscription.unsubscribe();
+      if (!asPath.includes('new')) {
+
+        const product: any = products.find((p) => asPath.includes(p.slug));
+
+        products && setFormData({
+          _id: product._id,
+          title: product.title,
+          description: product.description,
+          images: product.images,
+          inStock: product.inStock,
+          price: product.price,
+          sizes: product.sizes,
+          slug: product.slug,
+          tags: product.tags,
+          type: product.type,
+          gender: product.gender,
+          popular: product.popular,
+        });
+        console.log(product)
+      }
+    } catch (ERR) {
+      console.log(ERR)
+    }
+
+  }, [, products]);
+
+
+
+
+
+
+
+  const getNewSlug = (title: string) => {
+    try {
+      const newSlug = title.trim()
+        .replaceAll(" ", "_")
+        .replaceAll("'", "")
+        .toLocaleLowerCase() || "";
+      setFormData({ ...formData, slug: newSlug })
+
     } catch (err) {
       alert(err);
     }
-  }, [watch, setValue]);
-
-
-
-
+  }
 
 
 
   const onChangeSize = (size: string) => {
-    try {
-      const currentSizes = getValues("sizes");
-      if (currentSizes.includes(size)) {
-        return setValue(
-          "sizes",
-          currentSizes.filter((s) => s !== size),
-          { shouldValidate: true }
-        );
-      }
+    // try {
+    //   const currentSizes = getValues("sizes");
+    //   if (currentSizes.includes(size)) {
+    //     return setValue(
+    //       "sizes",
+    //       currentSizes.filter((s) => s !== size),
+    //       { shouldValidate: true }
+    //     );
+    //   }
 
-      setValue("sizes", [...currentSizes, size], { shouldValidate: true });
-      console.log(currentSizes)
-    } catch (err) {
+    //   setValue("sizes", [...currentSizes, size], { shouldValidate: true });
+    //   console.log(currentSizes)
+    // } catch (err) {
 
-      alert(err)
-    }
+    //   alert(err)
+    // }
   };
 
   const onChangeTalla = (size: string, number: number) => {
@@ -181,30 +207,30 @@ const ProductAdminPage: FC<Props> = ({ product }) => {
   };
 
   const onNewTag = () => {
-    try {
-      const newTag = newTagValue.trim().toLocaleLowerCase();
-      setNewTagValue("");
-      const currentTags = getValues("tags");
+    // try {
+    //   const newTag = newTagValue.trim().toLocaleLowerCase();
+    //   setNewTagValue("");
+    //   const currentTags = getValues("tags");
 
-      if (currentTags.includes(newTag)) {
-        return;
-      }
+    //   if (currentTags.includes(newTag)) {
+    //     return;
+    //   }
 
-      currentTags.push(newTag);
-    } catch (err) {
-      alert(err);
-    }
+    //   currentTags.push(newTag);
+    // } catch (err) {
+    //   alert(err);
+    // }
   };
 
   const onDeleteTag = (tag: string) => {
-    try {
-      const updatedTags = getValues("tags").filter((t) => t !== tag);
-      setValue("tags", updatedTags, { shouldValidate: true });
-    } catch (err) {
-      alert(err);
-    }
-  };
-
+    //   try {
+    //     const updatedTags = getValues("tags").filter((t) => t !== tag);
+    //     setValue("tags", updatedTags, { shouldValidate: true });
+    //   } catch (err) {
+    //     alert(err);
+    //   }
+    // };
+  }
   const onFilesSelected = async ({ target }: ChangeEvent<HTMLInputElement>) => {
     if (!target.files || target.files.length === 0) {
       return;
@@ -212,15 +238,16 @@ const ProductAdminPage: FC<Props> = ({ product }) => {
 
     try {
       for (const file of target.files) {
-        const formData = new FormData();
-        formData.append("file", file);
+        const formData_ = new FormData();
+        formData_.append("file", file);
         const { data } = await tesloApi.post<{ message: string }>(
           "/admin/upload",
-          formData
+          formData_
         );
-        setValue("images", [...getValues("images"), data.message], {
-          shouldValidate: true,
-        });
+        const newImages = [data.message]
+
+        setFormData({ ...formData, images: newImages.concat(formData.images) })
+
       }
     } catch (error) {
       console.log({ error });
@@ -228,21 +255,15 @@ const ProductAdminPage: FC<Props> = ({ product }) => {
   };
 
   const onDeleteImage = (image: string) => {
-    setValue(
-      "images",
-      getValues("images").filter((img) => img !== image),
-      { shouldValidate: true }
-    );
+    // setValue(
+    //   "images",
+    //   getValues("images").filter((img) => img !== image),
+    //   { shouldValidate: true }
+    // );
   };
 
   const onChangePopular = async (e: string) => {
-    if (e == "true") {
-      setValue("popular", true);
-      console.log(getValues("popular"));
-    } else {
-      setValue("popular", false);
-      console.log(getValues("popular"));
-    }
+
   };
 
 
@@ -281,15 +302,17 @@ const ProductAdminPage: FC<Props> = ({ product }) => {
       console.log(error);
     }
   };
+
+
   return (
 
 
     <AdminLayout
       title={"Producto"}
-      subTitle={`Editando: ${product.title}`}
+      subTitle={`Editando:`}
       icon={<DriveFileRenameOutline />}
     >
-      {user?.email?.toLowerCase() == 'jorgeochipinti97@gmail.com' || 'felanese1996@gmail.com' || 'Maurobelli22@gmail.com ' ? (
+      {user?.email?.toLowerCase() == 'jorgeochipinti97@gmail.com' || 'felanese1996@gmail.com' || 'Maurobelli22@gmail.com ' || 'sabrinagerzovich@hotmail.com' || 'sabrina.gerzovich@dhl.com' ? (
         <>
           {asPath == "/admin/products/new" ? null : (
             <Box display="flex" justifyContent="end" sx={{ mb: 2 }}>
@@ -308,7 +331,7 @@ const ProductAdminPage: FC<Props> = ({ product }) => {
               color="error"
               startIcon={<DeleteForeverIcon />}
               sx={{ width: "150px", mb: 2 }}
-              onClick={handleSubmit(onSubmitDelete)}
+            // onClick={handleSubmit(onSubmitDelete)}
             >
               Borrar Producto
             </Button>
@@ -316,18 +339,19 @@ const ProductAdminPage: FC<Props> = ({ product }) => {
               label="introduzca el nombre para eliminar correctamente"
               variant="filled"
               sx={{ mb: 3, width: "300px" }}
-              {...register("title", {
-                required: "Este campo es requerido",
-                minLength: { value: 2, message: "Mínimo 2 caracteres" },
+              value={formData.title}
+
+              onChange={(event) => setFormData({
+                ...formData, title: event.target.value
               })}
-              error={!!errors.title}
-              helperText={errors.title?.message}
+
+
             />
           </Box>
 
           <Divider sx={{ my: 1 }} />
 
-          <form onSubmit={handleSubmit(onSubmit)}>
+          <form >
             <Box display="flex" justifyContent="end" sx={{ mb: 1 }}>
               <Button
                 color="secondary"
@@ -348,12 +372,16 @@ const ProductAdminPage: FC<Props> = ({ product }) => {
                   variant="filled"
                   fullWidth
                   sx={{ mb: 1 }}
-                  {...register("title", {
-                    required: "Este campo es requerido",
-                    minLength: { value: 2, message: "Mínimo 2 caracteres" },
-                  })}
-                  error={!!errors.title}
-                  helperText={errors.title?.message}
+                  value={formData.title}
+
+                  onChange={(event) => {
+                    setFormData({
+                      ...formData, title: event.target.value
+                    })
+                    getNewSlug(event.target.value)
+                  }
+                  }
+
                 />
 
                 <TextField
@@ -362,11 +390,11 @@ const ProductAdminPage: FC<Props> = ({ product }) => {
                   fullWidth
                   multiline
                   sx={{ mb: 1 }}
-                  {...register("description", {
-                    required: "Este campo es requerido",
+                  value={formData.description}
+
+                  onChange={(event) => setFormData({
+                    ...formData, description: event.target.value
                   })}
-                  error={!!errors.description}
-                  helperText={errors.description?.message}
                 />
 
                 <TextField
@@ -375,12 +403,11 @@ const ProductAdminPage: FC<Props> = ({ product }) => {
                   variant="filled"
                   fullWidth
                   sx={{ mb: 1 }}
-                  {...register("inStock", {
-                    required: "Este campo es requerido",
-                    min: { value: 0, message: "Mínimo de valor cero" },
+                  value={formData.inStock}
+
+                  onChange={(event) => setFormData({
+                    ...formData, inStock: parseInt(event.target.value)
                   })}
-                  error={!!errors.inStock}
-                  helperText={errors.inStock?.message}
                 />
 
                 <TextField
@@ -389,12 +416,10 @@ const ProductAdminPage: FC<Props> = ({ product }) => {
                   variant="filled"
                   fullWidth
                   sx={{ mb: 1 }}
-                  {...register("price", {
-                    required: "Este campo es requerido",
-                    min: { value: 0, message: "Mínimo de valor cero" },
+                  value={formData.price}
+                  onChange={(event) => setFormData({
+                    ...formData, price: parseInt(event.target.value)
                   })}
-                  error={!!errors.price}
-                  helperText={errors.price?.message}
                 />
 
                 <Box display="flex" flexDirection="column">
@@ -402,10 +427,11 @@ const ProductAdminPage: FC<Props> = ({ product }) => {
                     <FormLabel>Género</FormLabel>
                     <RadioGroup
                       row
-                      value={getValues("gender")}
-                      onChange={({ target }) =>
-                        setValue("gender", target.value, { shouldValidate: true })
-                      }
+                      value={formData.gender}
+
+                      onChange={(event) => setFormData({
+                        ...formData, gender: event.target.value
+                      })}
                     >
                       {validGender.map((option) => (
                         <FormControlLabel
@@ -422,19 +448,12 @@ const ProductAdminPage: FC<Props> = ({ product }) => {
 
                     <RadioGroup
                       row
-                      value={getValues("type")}
-                      onChange={({ target }) =>
-                        setValue("type", target.value, { shouldValidate: true })
-                      }
+                      value={formData.type}
+                      onChange={(event) => setFormData({
+                        ...formData, type: event.target.value
+                      })}
                     >
-                      {getValues("gender") == 'regionals' ? validTypesRegional.map((option) => (
-                        <FormControlLabel
-                          key={option}
-                          value={option}
-                          control={<Radio color="secondary" />}
-                          label={capitalize(option)}
-                        />
-                      )) : validTypesFootball.map((option) => (
+                      {validTypesRegional.concat(validTypesFootball).map((option) => (
                         <FormControlLabel
                           key={option}
                           value={option}
@@ -474,15 +493,19 @@ const ProductAdminPage: FC<Props> = ({ product }) => {
                   variant="filled"
                   fullWidth
                   sx={{ mb: 1 }}
-                  {...register("slug", {
-                    required: "Este campo es requerido",
-                    validate: (val) =>
-                      val.trim().includes(" ")
-                        ? "No puede tener espacios en blanco"
-                        : undefined,
+                  onChange={(event) => setFormData({
+                    ...formData, slug: event.target.value
                   })}
-                  error={!!errors.slug}
-                  helperText={errors.slug?.message}
+                  value={formData.slug}
+                // {...register("slug", {
+                //   required: "Este campo es requerido",
+                //   validate: (val) =>
+                //     val.trim().includes(" ")
+                //       ? "No puede tener espacios en blanco"
+                //       : undefined,
+                // })}
+                // error={!!errors.slug}
+                // helperText={errors.slug?.message}
                 />
 
                 <TextField
@@ -508,7 +531,7 @@ const ProductAdminPage: FC<Props> = ({ product }) => {
                   }}
                   component="ul"
                 >
-                  {getValues("tags") && getValues("tags").map((tag) => {
+                  {formData.tags && formData.tags.map((tag: string) => {
                     return (
                       <Chip
                         key={tag}
@@ -549,12 +572,12 @@ const ProductAdminPage: FC<Props> = ({ product }) => {
                     color="error"
                     variant="outlined"
                     sx={{
-                      display: getValues("images") && getValues("images").length < 2 ? "flex" : "none",
+                      display: formData.images.length < 2 ? "flex" : "none",
                     }}
                   />
 
                   <Grid container spacing={2}>
-                    {getValues("images") && getValues("images").map((img) => (
+                    {formData.images.map((img) => (
                       <Grid item xs={4} sm={3} key={img}>
                         <Card>
                           <CardMedia
@@ -587,12 +610,14 @@ const ProductAdminPage: FC<Props> = ({ product }) => {
                       <FormControlLabel
                         key={size}
                         control={
-                          <Checkbox checked={getValues("sizes") && getValues("sizes").includes(size)} />
+                          <Checkbox checked={formData.sizes && formData.sizes.includes(size)} />
                         }
                         label={size}
+
                         onChange={() => {
                           onChangeSize(size);
-                          getValues("sizes") && getValues("sizes").includes(size) &&
+
+                          formData.sizes.includes(size) &&
                             onDeleteTallas(size);
                         }}
                       />
@@ -606,7 +631,6 @@ const ProductAdminPage: FC<Props> = ({ product }) => {
                         onClick={() => {
 
 
-                          console.log(getValues('sizes'))
 
                         }}
                       >
@@ -620,10 +644,14 @@ const ProductAdminPage: FC<Props> = ({ product }) => {
             </Grid>
           </form>
         </>)
-        : (<>
-          no estas autorizado
-        </>)
+        :
+        (
+          <>
+No estas autorizado
+          </>
+        )
       }
+
     </AdminLayout>
 
 
@@ -631,51 +659,51 @@ const ProductAdminPage: FC<Props> = ({ product }) => {
   );
 };
 
-export const getServerSideProps: GetServerSideProps = async ({ query }) => {
-  const { slug = "" } = query;
+// export const getServerSideProps: GetServerSideProps = async ({ query }) => {
+//   const { slug = "" } = query;
 
-  let product
+//   let product
 
-  if (slug === "new") {
-    const tempProduct: FormData = {
-      title: '',
-      description: '',
-      images: ["https://res.cloudinary.com/djk4q3tys/image/upload/v1686040726/shh7ufqpxuywai67lxwe.jpg", "https://res.cloudinary.com/djk4q3tys/image/upload/v1686040710/mk27c2fgicm67crrgya5.jpg"],
-      inStock: 0,
-      price: 0,
-      sizes: [],
-      slug: '',
-      tags: [],
-      type: '',
-      gender: '',
-      popular: false,
+//   if (slug === "new") {
+//     const tempProduct: FormData = {
+//       title: '',
+//       description: '',
+//       images: ["https://res.cloudinary.com/djk4q3tys/image/upload/v1686040726/shh7ufqpxuywai67lxwe.jpg", "https://res.cloudinary.com/djk4q3tys/image/upload/v1686040710/mk27c2fgicm67crrgya5.jpg"],
+//       inStock: 0,
+//       price: 0,
+//       sizes: [],
+//       slug: '',
+//       tags: [],
+//       type: '',
+//       gender: '',
+//       popular: false,
 
-    }
-    // JSON.parse(JSON.stringify(new Product()));
-    // delete tempProduct._id;
-    // tempProduct.images = [
-    //   "https://res.cloudinary.com/djk4q3tys/image/upload/v1649803292/ayamwt6hdthkkqnhyhkw.jpg",
-    //   "https://res.cloudinary.com/djk4q3tys/image/upload/v1649803292/ayamwt6hdthkkqnhyhkw.jpg",
-    // ];
-    product = tempProduct;
-  } else {
-    product = await dbProducts.getProductBySlug(slug.toString());
-  }
+//     }
+//     // JSON.parse(JSON.stringify(new Product()));
+//     // delete tempProduct._id;
+//     // tempProduct.images = [
+//     //   "https://res.cloudinary.com/djk4q3tys/image/upload/v1649803292/ayamwt6hdthkkqnhyhkw.jpg",
+//     //   "https://res.cloudinary.com/djk4q3tys/image/upload/v1649803292/ayamwt6hdthkkqnhyhkw.jpg",
+//     // ];
+//     product = tempProduct;
+//   } else {
+//     product = await dbProducts.getProductBySlug(slug.toString());
+//   }
 
-  if (!product && product != undefined) {
-    return {
-      redirect: {
-        destination: "/admin/products",
-        permanent: false,
-      },
-    };
-  }
+//   if (!product && product != undefined) {
+//     return {
+//       redirect: {
+//         destination: "/admin/products",
+//         permanent: false,
+//       },
+//     };
+//   }
 
-  return {
-    props: {
-      product,
-    },
-  };
-};
+//   return {
+//     props: {
+//       product,
+//     },
+//   };
+// };
 
-export default ProductAdminPage;
+export default ProductAdminPage

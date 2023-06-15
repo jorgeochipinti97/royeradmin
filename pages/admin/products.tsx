@@ -97,7 +97,7 @@ const ProductsPage = () => {
             subTitle={'Mantenimiento de Productos'}
             icon={<CategoryOutlined />}
         >
-            {user?.email?.toLowerCase() == 'jorgeochipinti97@gmail.com' ? (
+      {user?.email?.toLowerCase() == 'jorgeochipinti97@gmail.com' || 'felanese1996@gmail.com' || 'Maurobelli22@gmail.com ' || 'sabrinagerzovich@hotmail.com' || 'sabrina.gerzovich@dhl.com' ? (
                 <>
 
                     <Box>
